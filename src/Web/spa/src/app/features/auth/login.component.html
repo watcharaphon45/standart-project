@@ -1,0 +1,33 @@
+<main class="auth">
+  <section class="card">
+    <p class="eyebrow">CLEAN · WORKSPACE</p>
+    <h1>เข้าสู่ระบบ</h1>
+    <p>จัดการข้อมูลองค์กรในพื้นที่ทำงานของคุณ</p>
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <app-input
+        inputId="identifier"
+        label="Username หรือ Email"
+        formControlName="identifier"
+        autocomplete="username"
+        [error]="errors.message(form, 'identifier')"
+        [invalid]="form.controls.identifier.touched && form.controls.identifier.invalid"
+      />
+      <app-input
+        inputId="password"
+        label="รหัสผ่าน"
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+        [error]="errors.message(form, 'password')"
+        [invalid]="form.controls.password.touched && form.controls.password.invalid"
+      />
+      @if (error()) {
+        <p role="alert" class="error">{{ error() }}</p>
+      }
+      <app-button type="submit" variant="primary" [loading]="busy()">
+        {{ busy() ? 'กำลังเข้าสู่ระบบ…' : 'เข้าสู่ระบบ' }}
+      </app-button>
+    </form>
+    <p class="help">ลืมรหัสผ่าน? ติดต่อผู้ดูแลบัญชีส่วนกลาง</p>
+  </section>
+</main>

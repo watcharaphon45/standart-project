@@ -1,0 +1,16 @@
+<div class="notices" aria-live="polite" aria-atomic="false">
+  @for (notice of notifications.notices(); track notice.id) {
+    <div
+      class="notice"
+      [class.failure]="notice.error || notice.type === 'error'"
+      [class.warning]="notice.type === 'warning'"
+      [class.info]="notice.type === 'info'"
+    >
+      <p>{{ notice.message }}</p>
+      <button type="button" (click)="notifications.dismiss(notice.id)" aria-label="ปิดข้อความ">
+        ×
+      </button>
+    </div>
+  }
+</div>
+

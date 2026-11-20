@@ -1,0 +1,59 @@
+<div class="control-field">
+  @if (label()) {
+    <label [for]="inputId()" [class.sr-only]="hideLabel()">
+      {{ label() }}@if (required()) { <span class="required" aria-hidden="true">*</span> }
+    </label>
+  }
+  <div
+    class="input-wrap"
+    [class.has-toggle]="hasToggle()"
+    [class.search-mode]="appearance() === 'search'"
+  >
+    @if (appearance() === 'search') {
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.85" />
+        <path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" />
+      </svg>
+    }
+    <input
+      #inputElement
+      [id]="inputId()"
+      [attr.name]="name() || null"
+      [type]="effectiveType()"
+      [value]="value()"
+      [attr.placeholder]="placeholder() || null"
+      [attr.autocomplete]="autocomplete() || null"
+      [attr.maxlength]="maxlength() ?? null"
+      [required]="required()"
+      [readOnly]="readonly()"
+      [disabled]="isDisabled()"
+      [attr.aria-invalid]="isInvalid() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      (input)="onInput($event)"
+      (blur)="onBlur()"
+    />
+    @if (showClear()) {
+      <button type="button" class="search-clear" aria-label="ล้างคำค้นหา" (click)="clearValue()">
+        ✕
+      </button>
+    }
+    @if (hasToggle()) {
+      <button
+        type="button"
+        class="password-toggle"
+        [disabled]="isDisabled()"
+        [attr.aria-label]="passwordVisible() ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'"
+        [attr.aria-pressed]="passwordVisible()"
+        (click)="togglePassword()"
+      >
+        {{ passwordVisible() ? 'ซ่อน' : 'แสดง' }}
+      </button>
+    }
+  </div>
+  @if (hint()) {
+    <small [id]="inputId() + '-help'">{{ hint() }}</small>
+  }
+  @if (error()) {
+    <p [id]="inputId() + '-error'" class="error">{{ error() }}</p>
+  }
+</div>

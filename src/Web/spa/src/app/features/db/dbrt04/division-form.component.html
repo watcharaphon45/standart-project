@@ -1,0 +1,74 @@
+<a routerLink="/db/dbrt04">← กลับข้อมูลฝ่าย</a>
+<h1>{{ editing ? 'แก้ไขฝ่าย' : 'เพิ่มฝ่าย' }}</h1>
+<section class="card">
+  @if (loading()) {
+    <app-loading />
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+    @if (editing) {
+      <app-button type="button" (buttonClick)="load()" [disabled]="pending.busy()">
+        โหลดข้อมูลใหม่
+      </app-button>
+    }
+  }
+  @if (conflict()) {
+    <div class="conflict" role="alert">
+      <h2>ข้อมูลถูกแก้ไขแล้ว</h2>
+      <p>โหลดข้อมูลล่าสุด แล้วนำค่าที่กรอกมาปรับใหม่ด้วยตนเอง</p>
+      <app-button type="button" (buttonClick)="load()">โหลดข้อมูลล่าสุด</app-button>
+    </div>
+  }
+  @if (draft(); as previous) {
+    <div class="draft">
+      <h2>ค่าที่กรอกไว้สำหรับอ้างอิง</h2>
+      <p>รหัส: {{ previous.code }}</p>
+      <p>ชื่อ: {{ previous.name }}</p>
+    </div>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="!loaded() || loading() || pending.busy() || conflict()">
+      <app-select
+        selectId="division-branch"
+        label="สาขา"
+        formControlName="branchId"
+        [options]="branchOptions()"
+        [required]="true"
+        [hint]="locked() ? 'ถูกใช้อ้างอิงแล้ว ย้ายสาขาไม่ได้' : ''"
+        [error]="errors.message(form, 'branchId')"
+        [invalid]="form.controls.branchId.touched && form.controls.branchId.invalid"
+      />
+      <app-input
+        inputId="division-code"
+        label="รหัสฝ่าย"
+        formControlName="code"
+        [maxlength]="50"
+        [required]="true"
+        [hint]="locked() ? 'รหัสถูกใช้อ้างอิงแล้ว เปลี่ยนไม่ได้' : 'ใช้ A–Z, 0–9, - และ _ สูงสุด 50 ตัวอักษร'"
+        [error]="errors.message(form, 'code')"
+        [invalid]="form.controls.code.touched && form.controls.code.invalid"
+      />
+      <app-input
+        inputId="division-name"
+        label="ชื่อฝ่าย"
+        formControlName="name"
+        [maxlength]="200"
+        [required]="true"
+        [error]="errors.message(form, 'name')"
+        [invalid]="form.controls.name.touched && form.controls.name.invalid"
+      />
+      <div class="actions">
+        <app-button
+          type="submit"
+          variant="primary"
+          [loading]="pending.busy()"
+          [disabled]="loading() || conflict()"
+        >
+          {{ pending.busy() ? 'กำลังบันทึก…' : 'บันทึกข้อมูล' }}
+        </app-button>
+        <a class="button" routerLink="/db/dbrt04">ยกเลิก</a>
+      </div>
+    </fieldset>
+  </form>
+</section>
+

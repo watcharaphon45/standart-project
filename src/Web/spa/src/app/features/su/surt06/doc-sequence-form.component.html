@@ -1,0 +1,90 @@
+<a routerLink="/su/surt06">← กลับเลขที่เอกสาร</a>
+<h1>{{ editing ? 'แก้ไขเลขที่เอกสาร' : 'เพิ่มเลขที่เอกสาร' }}</h1>
+<section class="card">
+  @if (loading()) {
+    <app-loading />
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+    @if (editing) {
+      <app-button type="button" (buttonClick)="load()" [disabled]="pending.busy()">
+        โหลดข้อมูลใหม่
+      </app-button>
+    }
+  }
+  @if (conflict()) {
+    <div class="conflict" role="alert">
+      <h2>ข้อมูลถูกแก้ไขแล้ว</h2>
+      <p>โหลดข้อมูลล่าสุด แล้วนำค่าที่กรอกมาปรับใหม่ด้วยตนเอง</p>
+      <app-button type="button" (buttonClick)="load()">โหลดข้อมูลล่าสุด</app-button>
+    </div>
+  }
+  @if (draft(); as previous) {
+    <div class="draft">
+      <h2>ค่าที่กรอกไว้สำหรับอ้างอิง</h2>
+      <p>รหัส: {{ previous.code }} | ชื่อ: {{ previous.name }} | Prefix: {{ previous.prefix }}</p>
+    </div>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="!loaded() || loading() || pending.busy() || conflict()">
+      <app-input
+        inputId="docseq-code"
+        label="รหัสชุดเลขที่"
+        formControlName="code"
+        [maxlength]="50"
+        [required]="true"
+        [hint]="locked() ? 'ถูกใช้ออกเลขแล้ว แก้ไขไม่ได้' : 'ใช้ A–Z, 0–9, - และ _ สูงสุด 50 ตัวอักษร'"
+        [error]="errors.message(form, 'code')"
+        [invalid]="form.controls.code.touched && form.controls.code.invalid"
+      />
+      <app-input
+        inputId="docseq-name"
+        label="ชื่อชุดเลขที่เอกสาร"
+        formControlName="name"
+        [maxlength]="200"
+        [required]="true"
+        [error]="errors.message(form, 'name')"
+        [invalid]="form.controls.name.touched && form.controls.name.invalid"
+      />
+      <app-input
+        inputId="docseq-prefix"
+        label="Prefix เอกสาร"
+        formControlName="prefix"
+        [maxlength]="20"
+        [required]="true"
+        [hint]="locked() ? 'ถูกใช้ออกเลขแล้ว แก้ไขไม่ได้' : 'เช่น INV, PO,JV ใช้ A–Z, 0–9, - และ _'"
+        [error]="errors.message(form, 'prefix')"
+        [invalid]="form.controls.prefix.touched && form.controls.prefix.invalid"
+      />
+      <app-select
+        selectId="docseq-reset"
+        label="รอบการรีเซ็ตเลข"
+        formControlName="resetPolicy"
+        [options]="resetPolicyOptions"
+        [required]="true"
+      />
+      <app-input
+        inputId="docseq-padding"
+        label="จำนวนหลัก Running Number"
+        type="number"
+        formControlName="paddingLength"
+        [required]="true"
+        hint="3–10 หลัก (เช่น 5 หลัก → 00001)"
+        [error]="errors.message(form, 'paddingLength')"
+        [invalid]="form.controls.paddingLength.touched && form.controls.paddingLength.invalid"
+      />
+      <div class="actions">
+        <app-button
+          type="submit"
+          variant="primary"
+          [loading]="pending.busy()"
+          [disabled]="loading() || conflict()"
+        >
+          {{ pending.busy() ? 'กำลังบันทึก…' : 'บันทึกข้อมูล' }}
+        </app-button>
+        <a class="button" routerLink="/su/surt06">ยกเลิก</a>
+      </div>
+    </fieldset>
+  </form>
+</section>
+

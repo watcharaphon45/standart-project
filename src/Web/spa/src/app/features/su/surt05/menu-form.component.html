@@ -1,0 +1,67 @@
+<a routerLink="/su/surt05">← กลับตั้งค่าเมนู</a>
+<h1>แก้ไขการแสดงผลเมนู</h1>
+<section class="card">
+  @if (loading()) {
+    <app-loading />
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+    <app-button type="button" (buttonClick)="load()" [disabled]="pending.busy()">
+      โหลดข้อมูลใหม่
+    </app-button>
+  }
+  @if (conflict()) {
+    <div class="conflict" role="alert">
+      <h2>ข้อมูลถูกแก้ไขแล้ว</h2>
+      <p>โหลดข้อมูลล่าสุด แล้วนำค่าที่กรอกมาปรับใหม่ด้วยตนเอง</p>
+      <app-button type="button" (buttonClick)="load()">โหลดข้อมูลล่าสุด</app-button>
+    </div>
+  }
+  @if (draft(); as previous) {
+    <div class="draft">
+      <h2>ค่าที่กรอกไว้สำหรับอ้างอิง</h2>
+      <p>ชื่อแสดงผล: {{ previous.displayName }} | ลำดับ: {{ previous.sortOrder }}</p>
+    </div>
+  }
+  @if (item(); as current) {
+    <div class="meta">
+      <p><strong>รหัสโปรแกรม:</strong> {{ current.programCode }} ({{ current.defaultName }})</p>
+      <p><strong>เส้นทาง:</strong> {{ current.route }} | <strong>สิทธิ์:</strong> {{ current.requiredPermission }}</p>
+    </div>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="!loaded() || loading() || pending.busy() || conflict()">
+      <app-input
+        inputId="menu-display-name"
+        label="ชื่อแสดงผลในเมนู"
+        formControlName="displayName"
+        [maxlength]="200"
+        [required]="true"
+        [error]="errors.message(form, 'displayName')"
+        [invalid]="form.controls.displayName.touched && form.controls.displayName.invalid"
+      />
+      <app-input
+        inputId="menu-sort-order"
+        label="ลำดับการแสดงผล"
+        type="number"
+        formControlName="sortOrder"
+        [required]="true"
+        hint="ระบุตัวเลข 1–9999 (ค่าน้อยแสดงก่อน)"
+        [error]="errors.message(form, 'sortOrder')"
+        [invalid]="form.controls.sortOrder.touched && form.controls.sortOrder.invalid"
+      />
+      <div class="actions">
+        <app-button
+          type="submit"
+          variant="primary"
+          [loading]="pending.busy()"
+          [disabled]="loading() || conflict()"
+        >
+          {{ pending.busy() ? 'กำลังบันทึก…' : 'บันทึกข้อมูล' }}
+        </app-button>
+        <a class="button" routerLink="/su/surt05">ยกเลิก</a>
+      </div>
+    </fieldset>
+  </form>
+</section>
+

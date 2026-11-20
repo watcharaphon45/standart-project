@@ -1,0 +1,67 @@
+h1 {
+  font-size: 1.8rem;
+  margin: 1.5rem 0;
+}
+
+.card {
+  max-width: 760px;
+  padding: 2rem;
+}
+
+form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.steps-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.steps-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.step-card {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--canvas);
+  display: grid;
+  gap: 0.5rem;
+}
+
+.step-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.actions {
+  margin-top: 1.5rem;
+}
+
+.conflict,
+.draft {
+  padding: 1rem;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}
+
+.draft {
+  background: var(--canvas);
+  border-color: var(--border);
+}
+
+h2 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+

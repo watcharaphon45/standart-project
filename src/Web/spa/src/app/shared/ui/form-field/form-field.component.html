@@ -1,0 +1,15 @@
+<div class="control-field">
+  @if (label()) {
+    <label [attr.for]="forId() || null">
+      {{ label() }}@if (required()) { <span class="required" aria-hidden="true">*</span> }
+    </label>
+  }
+  <ng-content />
+  @if (hint()) {
+    <small [attr.id]="forId() ? forId() + '-help' : null">{{ hint() }}</small>
+  }
+  @if (error()) {
+    <p [attr.id]="forId() ? forId() + '-error' : null" class="error">{{ error() }}</p>
+  }
+</div>
+

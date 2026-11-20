@@ -1,0 +1,19 @@
+name: clean-starter-dev
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: clean_dev
+      POSTGRES_USER: clean_dev
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/Start-Database.ps1 first}
+    ports:
+      - "${POSTGRES_BIND_ADDRESS:-127.0.0.1}:55432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U clean_dev -d clean_dev"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+volumes:
+  postgres-data:

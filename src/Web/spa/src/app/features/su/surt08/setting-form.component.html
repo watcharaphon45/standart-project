@@ -1,0 +1,99 @@
+<a routerLink="/su/surt08">← กลับตั้งค่าระบบ</a>
+<h1>{{ editing ? 'แก้ไขค่าตั้งค่าระบบ' : 'เพิ่มค่าตั้งค่าระบบ' }}</h1>
+<section class="card">
+  @if (loading()) {
+    <app-loading />
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+    @if (editing) {
+      <app-button type="button" (buttonClick)="load()" [disabled]="pending.busy()">
+        โหลดข้อมูลใหม่
+      </app-button>
+    }
+  }
+  @if (conflict()) {
+    <div class="conflict" role="alert">
+      <h2>ข้อมูลถูกแก้ไขแล้ว</h2>
+      <p>โหลดข้อมูลล่าสุด แล้วนำค่าที่กรอกมาปรับใหม่ด้วยตนเอง</p>
+      <app-button type="button" (buttonClick)="load()">โหลดข้อมูลล่าสุด</app-button>
+    </div>
+  }
+  @if (draft(); as previous) {
+    <div class="draft">
+      <h2>ค่าที่กรอกไว้สำหรับอ้างอิง</h2>
+      <p>ชื่อ: {{ previous.displayName }} | ค่า: {{ previous.value }}</p>
+    </div>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="!loaded() || loading() || pending.busy() || conflict()">
+      @if (!editing && session.hasGlobal('SURT08.CREATE')) {
+        <app-select
+          selectId="setting-scope"
+          label="ขอบเขตตั้งค่า"
+          formControlName="scope"
+          [options]="scopeOptions"
+        />
+      }
+      <app-input
+        inputId="setting-key"
+        label="คีย์ตั้งค่า"
+        formControlName="key"
+        [maxlength]="50"
+        [required]="true"
+        hint="ใช้ A–Z, 0–9, จุด, - และ _ สูงสุด 50 ตัวอักษร"
+        [error]="errors.message(form, 'key')"
+        [invalid]="form.controls.key.touched && form.controls.key.invalid"
+      />
+      <app-input
+        inputId="setting-display-name"
+        label="ชื่อแสดงผล"
+        formControlName="displayName"
+        [maxlength]="200"
+        [required]="true"
+        [error]="errors.message(form, 'displayName')"
+        [invalid]="form.controls.displayName.touched && form.controls.displayName.invalid"
+      />
+      <app-select
+        selectId="setting-data-type"
+        label="ชนิดข้อมูล"
+        formControlName="dataType"
+        [options]="dataTypeOptions"
+        [required]="true"
+      />
+      @if (!editing) {
+        <app-checkbox
+          checkboxId="setting-sensitive"
+          label="เป็นข้อมูลลับ (ซ่อนค่าใน API/หน้าจอ และปกปิดใน Audit Log)"
+          formControlName="isSensitive"
+        />
+      }
+      <app-input
+        inputId="setting-value"
+        label="ค่าตั้งค่า"
+        [type]="sensitiveMode() ? 'password' : 'text'"
+        formControlName="value"
+        [maxlength]="500"
+        [hint]="
+          editing && sensitiveMode()
+            ? 'ข้อมูลลับ: เว้นว่างหากต้องการคงค่าเดิมไว้'
+            : 'ระบุค่าให้ตรงชนิดข้อมูล (เช่น true/false สำหรับ BOOLEAN)'
+        "
+        [error]="errors.message(form, 'value')"
+        [invalid]="form.controls.value.touched && form.controls.value.invalid"
+      />
+      <div class="actions">
+        <app-button
+          type="submit"
+          variant="primary"
+          [loading]="pending.busy()"
+          [disabled]="loading() || conflict()"
+        >
+          {{ pending.busy() ? 'กำลังบันทึก…' : 'บันทึกข้อมูล' }}
+        </app-button>
+        <a class="button" routerLink="/su/surt08">ยกเลิก</a>
+      </div>
+    </fieldset>
+  </form>
+</section>
+

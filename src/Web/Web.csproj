@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup><RootNamespace>clean.Web</RootNamespace><DefaultItemExcludes>$(DefaultItemExcludes);spa/**</DefaultItemExcludes></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../Infrastructure/Infrastructure.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" PrivateAssets="all" />
+  </ItemGroup>
+</Project>

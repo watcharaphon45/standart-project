@@ -1,0 +1,57 @@
+<app-page-header
+  eyebrow="ผู้ดูแลระบบ / SURT08"
+  title="ตั้งค่าระบบ"
+  description="จัดการพารามิเตอร์ระบบส่วนกลางและระดับบริษัท พร้อมการปกปิดข้อมูลลับ"
+>
+  @if (session.canCreate('SURT08')) {
+    <a class="button primary" routerLink="create">+ เพิ่มค่าตั้งค่า</a>
+  }
+</app-page-header>
+<section class="card">
+  <app-table-toolbar
+    searchId="setting-keyword"
+    searchPlaceholder="ค้นหาคีย์ หรือชื่อตั้งค่า..."
+    [(keyword)]="keyword"
+    [loading]="loading()"
+    [hasFilters]="session.hasGlobal('SURT08.VIEW')"
+    [activeFilterCount]="activeFilterCount"
+    (search)="search()"
+    (resetFilters)="resetFilters()"
+  >
+    @if (session.hasGlobal('SURT08.VIEW')) {
+      <app-select
+        selectId="setting-scope-filter"
+        label="ขอบเขต"
+        name="scopeMode"
+        [options]="scopeOptions"
+        [value]="scopeMode()"
+        (valueChange)="onScopeChange($event)"
+      />
+    }
+  </app-table-toolbar>
+  <app-data-table
+    [rows]="rows()"
+    [columns]="columns"
+    caption="รายการค่าตั้งค่าระบบ"
+    [loading]="loading()"
+    [failed]="failed()"
+    [total]="total()"
+    [page]="page"
+    [pageSize]="pageSize"
+    [sortField]="sortBy"
+    [sortDirection]="sortDirection"
+    (sort)="sort($event)"
+    (retry)="load()"
+    (pageChange)="pageTo($event)"
+    (pageSizeChange)="resize($event)"
+  >
+    <ng-template #rowActions let-row>
+      <div class="actions">
+        @if (session.hasAction('SURT08', 'UPDATE')) {
+          <app-button type="button" (buttonClick)="edit(row.id)">แก้ไข</app-button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</section>
+

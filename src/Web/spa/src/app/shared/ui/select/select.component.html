@@ -1,0 +1,166 @@
+<div class="control-field">
+  @if (label()) {
+    <label [for]="selectId()">
+      {{ label() }}@if (required()) { <span class="required" aria-hidden="true">*</span> }
+    </label>
+  }
+  <div
+    #triggerBox
+    cdkOverlayOrigin
+    #origin="cdkOverlayOrigin"
+    class="combobox-box"
+    [class.size-sm]="size() === 'sm'"
+    [class.open]="isOpen()"
+    [class.invalid]="isInvalid()"
+    [class.disabled]="isDisabled()"
+  >
+    <input
+      #inputElement
+      type="text"
+      autocomplete="off"
+      role="combobox"
+      aria-autocomplete="list"
+      aria-haspopup="listbox"
+      [id]="selectId()"
+      [attr.name]="name() || null"
+      [attr.aria-label]="!label() && ariaLabel() ? ariaLabel() : null"
+      [attr.aria-expanded]="isOpen() ? 'true' : 'false'"
+      [attr.aria-controls]="isOpen() ? listboxId() : null"
+      [attr.aria-activedescendant]="isOpen() ? activeOptionId() : null"
+      [attr.aria-invalid]="isInvalid() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      [required]="required()"
+      [disabled]="isDisabled()"
+      [placeholder]="effectivePlaceholder()"
+      [value]="inputDisplayValue()"
+      (focus)="onInputFocus()"
+      (click)="onInputClick()"
+      (input)="onInput($event)"
+      (keydown)="onKeydown($event)"
+      (blur)="onInputBlur()"
+    />
+    @if (showClearButton()) {
+      <button
+        type="button"
+        class="clear-btn"
+        tabindex="-1"
+        [attr.aria-label]="'ล้างค่า ' + (label() || ariaLabel() || 'ตัวเลือก')"
+        title="ล้างค่า"
+        (mousedown)="$event.preventDefault()"
+        (click)="onClearClick($event)"
+      >
+        ×
+      </button>
+    }
+    <button
+      type="button"
+      class="chevron-btn"
+      tabindex="-1"
+      aria-hidden="true"
+      (mousedown)="onChevronMouseDown($event)"
+    >
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+        <path
+          d="M4 6l4 4 4-4"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <ng-template
+    cdkConnectedOverlay
+    [cdkConnectedOverlayOrigin]="origin"
+    [cdkConnectedOverlayOpen]="isOpen()"
+    [cdkConnectedOverlayPositions]="overlayPositions"
+    [cdkConnectedOverlayMinWidth]="computedPanelMinWidth()"
+    [cdkConnectedOverlayPush]="true"
+    [cdkConnectedOverlayHasBackdrop]="false"
+    (overlayOutsideClick)="onOutsideClick($event)"
+    (detach)="close(true)"
+  >
+    <div class="ddl-overlay-panel">
+      <div class="ddl-meta">
+        <span>พิมพ์เพื่อค้นหา</span>
+        <span class="ddl-count">{{ filteredOptions().length }} / {{ options().length }}</span>
+      </div>
+      <div
+        #listElement
+        class="ddl-list scroll-thin"
+        role="listbox"
+        [id]="listboxId()"
+        [attr.aria-label]="listboxLabel()"
+      >
+        @if (filteredOptions().length === 0) {
+          <div class="ddl-empty">
+            <p class="ddl-empty-title">ไม่พบรายการที่ตรงกับ "{{ searchQuery().trim() }}"</p>
+            <p class="ddl-empty-sub">ลองพิมพ์รหัสหรือคำสำคัญที่สั้นลง</p>
+          </div>
+        } @else {
+          @for (option of filteredOptions(); track option.value; let i = $index) {
+            @if (shouldShowGroupHeader(i)) {
+              <div class="ddl-group">{{ option.group }}</div>
+            }
+            <div
+              class="ddl-option"
+              role="option"
+              [id]="optionDomId(i)"
+              [attr.aria-selected]="option.value === currentValue() ? 'true' : 'false'"
+              [attr.aria-disabled]="option.disabled ? 'true' : null"
+              [class.active]="i === activeIndex()"
+              [class.selected]="option.value === currentValue()"
+              [class.disabled]="!!option.disabled"
+              (mousedown)="$event.preventDefault()"
+              (click)="selectOption(option)"
+              (mouseenter)="!option.disabled && activeIndex.set(i)"
+            >
+              <div class="ddl-option-main">
+                @if (option.code) {
+                  <span class="ddl-option-code">
+                    @for (seg of highlightSegments(option.code); track $index) {
+                      @if (seg.match) {
+                        <mark class="ddl-mark">{{ seg.text }}</mark>
+                      } @else {
+                        {{ seg.text }}
+                      }
+                    }
+                  </span>
+                }
+                <span class="ddl-option-label">
+                  @for (seg of highlightSegments(option.label); track $index) {
+                    @if (seg.match) {
+                      <mark class="ddl-mark">{{ seg.text }}</mark>
+                    } @else {
+                      {{ seg.text }}
+                    }
+                  }
+                </span>
+                @if (option.sublabel) {
+                  <span class="ddl-option-sub">({{ option.sublabel }})</span>
+                }
+              </div>
+              <div class="ddl-option-end">
+                @if (option.disabled || option.disabledBadge) {
+                  <span class="ddl-option-badge">{{ option.disabledBadge || 'ปิดใช้งาน' }}</span>
+                }
+                @if (option.value === currentValue() && !option.disabled) {
+                  <span class="ddl-option-check" aria-hidden="true">✓</span>
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </ng-template>
+
+  @if (hint()) {
+    <small [id]="selectId() + '-help'">{{ hint() }}</small>
+  }
+  @if (error()) {
+    <p [id]="selectId() + '-error'" class="error">{{ error() }}</p>
+  }
+</div>

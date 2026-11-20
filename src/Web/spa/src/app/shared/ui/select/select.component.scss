@@ -1,0 +1,122 @@
+:host {
+  display: block;
+}
+
+.control-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+label {
+  margin-bottom: 0;
+}
+
+.combobox-box {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0 0.55rem 0 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #a8a8a8;
+  background: var(--canvas);
+  color: var(--text);
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.combobox-box.size-sm {
+  min-height: 36px;
+  padding: 0 0.45rem 0 0.65rem;
+  font-size: 0.875rem;
+}
+
+.combobox-box:hover:not(.disabled):not(:has(input:disabled)) {
+  background: var(--surface);
+  border-color: var(--muted);
+}
+
+.combobox-box.open,
+.combobox-box:focus-within:not(.disabled):not(:has(input:disabled)) {
+  background: var(--surface);
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgb(0 100 224 / 0.18);
+}
+
+.combobox-box.invalid {
+  border-color: #be123c;
+}
+
+.combobox-box.invalid:focus-within,
+.combobox-box.invalid.open {
+  box-shadow: 0 0 0 3px rgb(190 18 60 / 0.18);
+}
+
+.combobox-box.disabled,
+.combobox-box:has(input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.58;
+  background: var(--surface-subtle);
+}
+
+.combobox-box input {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  width: auto;
+  border: 0;
+  padding: 0.35rem 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  outline: none;
+  box-shadow: none;
+}
+
+.combobox-box input:focus-visible {
+  outline: none;
+}
+
+.clear-btn,
+.chevron-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.clear-btn:hover {
+  background: var(--surface-subtle);
+  color: var(--text);
+}
+
+.chevron-btn {
+  transition: transform 0.15s ease;
+}
+
+.combobox-box.open .chevron-btn {
+  transform: rotate(180deg);
+}
+
+.combobox-box:has(input:disabled) .clear-btn,
+.combobox-box:has(input:disabled) .chevron-btn {
+  pointer-events: none;
+}
+
+small {
+  color: var(--muted);
+}
+
+.error:empty {
+  display: none;
+}

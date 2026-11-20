@@ -1,0 +1,15 @@
+<section
+  class="card"
+  [class.danger]="data.type === 'danger'"
+  [class.warning]="data.type === 'warning'"
+>
+  <h2>{{ title }}</h2>
+  <p>{{ message }}</p>
+  <div class="actions">
+    <app-button type="button" (buttonClick)="ref.close(false)">{{ cancelText }}</app-button>
+    <app-button type="button" [variant]="confirmVariant" (buttonClick)="ref.close(true)">{{
+      confirmText
+    }}</app-button>
+  </div>
+</section>
+

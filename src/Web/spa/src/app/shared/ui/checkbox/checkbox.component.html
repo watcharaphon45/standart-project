@@ -1,0 +1,28 @@
+<div class="control-field">
+  <label class="checkbox-label" [for]="checkboxId()" [class.disabled]="isDisabled()">
+    <input
+      #checkboxElement
+      type="checkbox"
+      [id]="checkboxId()"
+      [attr.name]="name() || null"
+      [checked]="checked()"
+      [indeterminate]="indeterminate()"
+      [required]="required()"
+      [disabled]="isDisabled()"
+      [attr.aria-invalid]="isInvalid() ? 'true' : null"
+      [attr.aria-describedby]="describedBy()"
+      (change)="onToggle($event)"
+      (blur)="onBlur()"
+    />
+    <span>
+      {{ label() }}@if (required()) { <span class="required" aria-hidden="true">*</span> }
+    </span>
+  </label>
+  @if (hint()) {
+    <small [id]="checkboxId() + '-help'">{{ hint() }}</small>
+  }
+  @if (error()) {
+    <p [id]="checkboxId() + '-error'" class="error">{{ error() }}</p>
+  }
+</div>
+

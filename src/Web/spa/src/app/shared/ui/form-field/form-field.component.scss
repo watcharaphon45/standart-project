@@ -1,0 +1,21 @@
+:host {
+  display: block;
+}
+
+.control-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+label {
+  margin-bottom: 0;
+}
+
+small {
+  color: var(--muted);
+}
+
+.error:empty {
+  display: none;
+}
+

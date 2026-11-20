@@ -1,0 +1,110 @@
+@if (failed()) {
+  <app-error-state [message]="errorMessage()" (retry)="retry.emit()" />
+} @else if (!loading() && rows().length === 0) {
+  <app-empty-state [message]="emptyMessage()" />
+} @else {
+  <div class="table-scroll scroll-thin" [attr.aria-busy]="loading() ? 'true' : null">
+    @if (loading()) {
+      <span class="sr-only" role="status">กำลังโหลดข้อมูล</span>
+    }
+    <table>
+      <caption class="sr-only">{{ caption() }}</caption>
+      <thead>
+        <tr>
+          @for (column of columns(); track column.key) {
+            <th
+              scope="col"
+              [class.cell-number]="column.format === 'number'"
+              [attr.aria-sort]="column.sortable ? sortValue(column.key) : null"
+            >
+              @if (column.sortable) {
+                <button
+                  type="button"
+                  class="sort-btn"
+                  [class.sorted]="sortField() === column.key"
+                  (click)="sort.emit(column.key)"
+                >
+                  {{ column.label }}
+                  <span class="sort-icon" aria-hidden="true">{{ sortIcon(column.key) }}</span>
+                </button>
+              } @else {
+                {{ column.label }}
+              }
+            </th>
+          }
+          @if (rowActions()) {
+            <th scope="col" class="actions-head">จัดการ</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          @for (item of skeletonRows; track item) {
+            <tr class="skeleton-row" aria-hidden="true">
+              @for (column of columns(); track column.key) {
+                <td><span class="skeleton"></span></td>
+              }
+              @if (rowActions()) {
+                <td class="table-actions"><span class="skeleton skeleton-actions"></span></td>
+              }
+            </tr>
+          }
+        } @else {
+          @for (row of rows(); track row.id) {
+            <tr [class.row-inactive]="isInactive(row)">
+              @for (column of columns(); track column.key) {
+                <td [class.cell-number]="column.format === 'number'">
+                  @switch (column.format) {
+                    @case ('status') {
+                      <span class="badge" [class.inactive]="!row[column.key]">{{
+                        row[column.key] ? 'เปิดใช้งาน' : 'ปิดใช้งาน'
+                      }}</span>
+                    }
+                    @case ('badge') {
+                      @if (badgeTone(column, row[column.key]); as tone) {
+                        <span [class]="'badge tone-' + tone">{{ row[column.key] }}</span>
+                      } @else {
+                        <span class="muted">{{ row[column.key] }}</span>
+                      }
+                    }
+                    @case ('code') {
+                      <span class="code">{{ row[column.key] }}</span>
+                    }
+                    @case ('mono') {
+                      <span class="mono">{{ row[column.key] }}</span>
+                    }
+                    @case ('trace') {
+                      <span class="mono trace" [attr.title]="row[column.key]">{{ row[column.key] }}</span>
+                    }
+                    @case ('muted') {
+                      <span class="muted">{{ row[column.key] }}</span>
+                    }
+                    @default {
+                      {{ row[column.key] }}
+                    }
+                  }
+                </td>
+              }
+              @if (rowActions(); as actions) {
+                <td class="table-actions">
+                  <ng-container
+                    [ngTemplateOutlet]="actions"
+                    [ngTemplateOutletContext]="{ $implicit: row }"
+                  />
+                </td>
+              }
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+}
+<app-table-pagination
+  [total]="total()"
+  [page]="page()"
+  [pageSize]="pageSize()"
+  [loading]="loading()"
+  (pageChange)="pageChange.emit($event)"
+  (pageSizeChange)="pageSizeChange.emit($event)"
+/>

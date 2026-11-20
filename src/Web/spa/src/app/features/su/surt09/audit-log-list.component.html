@@ -1,0 +1,100 @@
+<app-page-header
+  eyebrow="ผู้ดูแลระบบ / SURT09"
+  title="ประวัติการใช้งาน (Audit Log)"
+  description="ค้นหา ตรวจสอบค่า Before/After และส่งออกประวัติการทำงานตามขอบเขตสิทธิ์ (อ่านอย่างเดียว)"
+>
+  @if (
+    scopeMode() === 'global'
+      ? session.hasGlobal('SURT09.EXPORT')
+      : session.hasAction('SURT09', 'EXPORT')
+  ) {
+    <app-button
+      type="button"
+      variant="primary"
+      [loading]="exporting()"
+      [disabled]="loading()"
+      (buttonClick)="exportCsv()"
+    >
+      {{ exporting() ? 'กำลังส่งออก…' : 'ส่งออก CSV' }}
+    </app-button>
+  }
+</app-page-header>
+<section class="card">
+  <app-table-toolbar
+    searchId="audit-keyword"
+    searchPlaceholder="ค้นหาผู้ทำรายการ, Action หรือ Trace ID..."
+    [(keyword)]="keyword"
+    [loading]="loading()"
+    [activeFilterCount]="activeFilterCount"
+    (search)="search()"
+    (resetFilters)="resetFilters()"
+  >
+    @if (session.hasGlobal('SURT09.VIEW')) {
+      <app-select
+        selectId="audit-scope-mode"
+        label="ขอบเขต"
+        name="scopeMode"
+        [options]="scopeOptions"
+        [value]="scopeMode()"
+        (valueChange)="onScopeChange($event)"
+      />
+    }
+    <app-select
+      selectId="audit-program-filter"
+      label="โปรแกรม"
+      name="programCode"
+      [clearable]="true"
+      [panelMinWidth]="300"
+      [options]="programOptions"
+      [(ngModel)]="programCode"
+    />
+  </app-table-toolbar>
+  <app-data-table
+    [rows]="rows()"
+    [columns]="columns"
+    caption="บันทึกประวัติการใช้งาน"
+    [loading]="loading()"
+    [failed]="failed()"
+    [total]="total()"
+    [page]="page"
+    [pageSize]="pageSize"
+    [sortField]="sortBy"
+    [sortDirection]="sortDirection"
+    (sort)="sort($event)"
+    (retry)="load()"
+    (pageChange)="pageTo($event)"
+    (pageSizeChange)="resize($event)"
+  >
+    <ng-template #rowActions let-row>
+      <div class="actions">
+        <app-button type="button" [disabled]="loadingDetail()" (buttonClick)="viewDetail(row.id)">
+          ดูรายละเอียด
+        </app-button>
+      </div>
+    </ng-template>
+  </app-data-table>
+</section>
+
+@if (selectedDetail(); as detail) {
+  <section class="card detail-card" aria-label="รายละเอียดประวัติการใช้งาน">
+    <div class="detail-head">
+      <h2>รายละเอียดรายการ #{{ detail.id }} ({{ detail.programCode }} · {{ detail.action }})</h2>
+      <app-button type="button" (buttonClick)="selectedDetail.set(null)">ปิดรายละเอียด</app-button>
+    </div>
+    <p class="meta">
+      ผู้ทำรายการ: {{ detail.actorUserName || '-' }} | เวลา (UTC): {{ detail.occurredAtUtc }} |
+      Trace ID: {{ detail.traceId }}
+    </p>
+    <div class="snapshots">
+      <div>
+        <h3>Before</h3>
+        <pre>{{ detail.before || '(ไม่มีค่าก่อนหน้า)' }}</pre>
+      </div>
+      <div>
+        <h3>After</h3>
+        <pre>{{ detail.after || '(ไม่มีค่าหลังแก้ไข)' }}</pre>
+      </div>
+    </div>
+  </section>
+}
+

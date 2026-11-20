@@ -1,0 +1,59 @@
+<app-page-header
+  eyebrow="ผู้ดูแลระบบ / SURT07"
+  title="ขั้นตอนอนุมัติ"
+  description="กำหนดสายอนุมัติและบทบาทผู้อนุมัติตามประเภทเอกสารในบริษัท"
+>
+  @if (session.canCreate('SURT07')) {
+    <a class="button primary" routerLink="create">+ เพิ่มขั้นตอนอนุมัติ</a>
+  }
+</app-page-header>
+<section class="card">
+  <app-table-toolbar
+    searchId="wf-keyword"
+    searchPlaceholder="ค้นหารหัส, ชื่อ หรือประเภทเอกสาร..."
+    [(keyword)]="keyword"
+    [loading]="loading()"
+    [activeFilterCount]="activeFilterCount"
+    (search)="search()"
+    (resetFilters)="resetFilters()"
+  >
+    <app-select
+      selectId="wf-status"
+      label="สถานะ"
+      name="active"
+      [clearable]="true"
+      [options]="statusOptions"
+      [(ngModel)]="active"
+    />
+  </app-table-toolbar>
+  <app-data-table
+    [rows]="rows()"
+    [columns]="columns"
+    caption="รายการขั้นตอนอนุมัติ"
+    [loading]="loading()"
+    [failed]="failed()"
+    [total]="total()"
+    [page]="page"
+    [pageSize]="pageSize"
+    [sortField]="sortBy"
+    [sortDirection]="sortDirection"
+    (sort)="sort($event)"
+    (retry)="load()"
+    (pageChange)="pageTo($event)"
+    (pageSizeChange)="resize($event)"
+  >
+    <ng-template #rowActions let-row>
+      <div class="actions">
+        @if (row.isActive && session.hasAction('SURT07', 'UPDATE')) {
+          <app-button type="button" (buttonClick)="edit(row.id)">แก้ไข</app-button>
+        }
+        @if (session.hasAction('SURT07', row.isActive ? 'DEACTIVATE' : 'ACTIVATE')) {
+          <app-button type="button" [disabled]="saving()" [class.row-action-danger]="row.isActive" (buttonClick)="statusById(row.id)">
+            {{ row.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน' }}
+          </app-button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</section>
+

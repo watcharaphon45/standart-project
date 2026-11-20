@@ -1,0 +1,51 @@
+<footer>
+  <span class="total">{{ rangeText() }}</span>
+  <div class="page-size">
+    <span>ต่อหน้า</span>
+    <app-select
+      ariaLabel="จำนวนรายการต่อหน้า"
+      size="sm"
+      [panelMinWidth]="100"
+      [options]="pageSizeOptions"
+      [value]="pageSizeString()"
+      (valueChange)="onResize($event)"
+    />
+  </div>
+  <nav class="pager" aria-label="เลขหน้า">
+    <button
+      type="button"
+      class="pager-btn"
+      aria-label="หน้าก่อนหน้า"
+      [disabled]="page() <= 1 || loading()"
+      (click)="goTo(page() - 1)"
+    >
+      ‹
+    </button>
+    @for (item of pages(); track $index) {
+      @if (item === null) {
+        <span class="gap" aria-hidden="true">…</span>
+      } @else {
+        <button
+          type="button"
+          class="pager-btn"
+          [class.current]="item === page()"
+          [attr.aria-current]="item === page() ? 'page' : null"
+          [attr.aria-label]="'หน้า ' + item"
+          [disabled]="loading()"
+          (click)="goTo(item)"
+        >
+          {{ item }}
+        </button>
+      }
+    }
+    <button
+      type="button"
+      class="pager-btn"
+      aria-label="หน้าถัดไป"
+      [disabled]="page() >= totalPages() || loading()"
+      (click)="goTo(page() + 1)"
+    >
+      ›
+    </button>
+  </nav>
+</footer>

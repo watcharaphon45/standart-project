@@ -1,0 +1,98 @@
+<app-page-header
+  eyebrow="ผู้ดูแลระบบ / SURT03"
+  title="จัดการสิทธิ์ตามบทบาท"
+  description="กำหนดสิทธิ์การเข้าถึงเมนูและคำสั่งของแต่ละบทบาท (มอบได้ไม่เกินเพดานสิทธิ์ของตนเอง)"
+/>
+<section class="card selector-card">
+  <div class="filters">
+    @if (session.hasGlobal('SURT03.VIEW')) {
+      <app-select
+        selectId="perm-scope-mode"
+        label="ขอบเขต"
+        name="permScopeMode"
+        [options]="scopeOptions"
+        [value]="scopeMode()"
+        (valueChange)="onScopeChange($event)"
+      />
+    }
+    <app-select
+      selectId="perm-role"
+      label="บทบาท"
+      name="permRole"
+      [options]="roleOptions()"
+      [value]="selectedRoleId()"
+      [disabled]="loading() || roles().length === 0"
+      (valueChange)="onRoleChange($event)"
+    />
+  </div>
+</section>
+
+<section class="card matrix-card">
+  @if (loading() || loadingDetail()) {
+    <app-loading />
+  } @else if (failed()) {
+    <app-error-state message="โหลดข้อมูลบทบาทและรายการสิทธิ์ไม่ได้" (retry)="loadCatalog()" />
+  } @else if (!detail()) {
+    <app-empty-state message="ยังไม่มีบทบาทในขอบเขตนี้ กรุณาสร้างบทบาทใน SURT02 ก่อน" />
+  } @else {
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+    @if (conflict()) {
+      <div class="conflict" role="alert">
+        <h2>ข้อมูลสิทธิ์ถูกแก้ไขแล้ว</h2>
+        <p>โหลดสิทธิ์ล่าสุดของบทบาท ก่อนปรับปรุงและบันทึกอีกครั้ง</p>
+        <app-button type="button" (buttonClick)="loadRoleDetail()">โหลดสิทธิ์ล่าสุด</app-button>
+      </div>
+    }
+    @if (draftPermissions(); as draft) {
+      <div class="draft">
+        <h2>สิทธิ์ที่เลือกไว้สำหรับอ้างอิง ({{ draft.length }} รายการ)</h2>
+        <p>{{ draft.join(', ') }}</p>
+      </div>
+    }
+    @if (!detail()!.isActive) {
+      <p class="notice" role="status">บทบาทนี้ถูกปิดใช้งานอยู่ จึงไม่สามารถแก้ไขสิทธิ์ได้</p>
+    }
+    <div class="groups">
+      @for (group of catalog(); track group.code) {
+        <article class="group">
+          <h2>
+            {{ group.name }} <span>{{ group.code }}</span>
+          </h2>
+          <div class="checks">
+            @for (item of group.items; track item.permission) {
+              <app-checkbox
+                [checkboxId]="'perm-' + item.permission"
+                [label]="item.label + (item.globalOnly ? ' (ส่วนกลางเท่านั้น)' : '')"
+                [name]="item.permission"
+                [ngModel]="selectedSet().has(item.permission)"
+                [disabled]="
+                  !canEdit() ||
+                  saving() ||
+                  conflict() ||
+                  !grantableSet().has(item.permission)
+                "
+                (ngModelChange)="togglePermission(item.permission, $event)"
+              />
+            }
+          </div>
+        </article>
+      }
+    </div>
+    @if (canEdit()) {
+      <div class="actions">
+        <app-button
+          type="button"
+          variant="primary"
+          [loading]="saving()"
+          [disabled]="conflict()"
+          (buttonClick)="save()"
+        >
+          {{ saving() ? 'กำลังบันทึก…' : 'บันทึกสิทธิ์' }}
+        </app-button>
+      </div>
+    }
+  }
+</section>
+

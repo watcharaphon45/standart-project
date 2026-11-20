@@ -1,0 +1,56 @@
+<form class="toolbar" (ngSubmit)="onSubmit()">
+  <div class="toolbar-main">
+    <div class="search-box">
+      <app-input
+        [inputId]="searchId()"
+        [label]="searchLabel()"
+        [hideLabel]="true"
+        appearance="search"
+        [clearable]="true"
+        name="toolbarKeyword"
+        [placeholder]="searchPlaceholder()"
+        [maxlength]="200"
+        [ngModel]="keyword()"
+        (ngModelChange)="keyword.set($event)"
+      />
+    </div>
+    <div class="toolbar-actions">
+      @if (hasFilters()) {
+        <app-button
+          class="filter-toggle-btn"
+          type="button"
+          variant="secondary"
+          [ariaExpanded]="filtersOpen()"
+          [ariaControls]="panelId"
+          (buttonClick)="toggleFilters()"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M4 6h16M7 12h10M10 18h4"
+              stroke="currentColor"
+              stroke-width="1.75"
+              stroke-linecap="round"
+            />
+          </svg>
+          <span>ตัวกรอง</span>
+          @if (activeFilterCount() > 0) {
+            <span class="filter-badge">{{ activeFilterCount() }}</span>
+          }
+        </app-button>
+      }
+      <app-button type="submit" variant="primary" [disabled]="loading()">ค้นหา</app-button>
+    </div>
+  </div>
+  @if (hasFilters()) {
+    <div class="filter-panel" [id]="panelId" [hidden]="!filtersOpen()">
+      <div class="filter-grid">
+        <ng-content />
+      </div>
+      <div class="filter-foot">
+        <app-button type="button" variant="ghost" (buttonClick)="onReset()">
+          ล้างตัวกรองทั้งหมด
+        </app-button>
+      </div>
+    </div>
+  }
+</form>

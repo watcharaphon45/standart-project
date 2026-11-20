@@ -1,0 +1,52 @@
+h1 {
+  font-size: 1.8rem;
+  margin: 1.5rem 0;
+}
+
+.card {
+  max-width: 760px;
+  padding: 2rem;
+}
+
+.meta {
+  padding: 0.75rem 1rem;
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.meta p {
+  margin: 0;
+}
+
+form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.actions {
+  margin-top: 1.5rem;
+}
+
+.conflict,
+.draft {
+  padding: 1rem;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}
+
+.draft {
+  background: var(--canvas);
+  border-color: var(--border);
+}
+
+h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+

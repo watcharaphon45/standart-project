@@ -1,0 +1,78 @@
+<app-page-header
+  eyebrow="ข้อมูลองค์กร / DBRT03"
+  title="ข้อมูลแผนก"
+  description="จัดการแผนกภายใต้ฝ่ายของบริษัทที่กำลังทำงาน"
+>
+  @if (session.canCreate('DBRT03')) {
+    <a class="button primary" routerLink="create">+ เพิ่มแผนก</a>
+  }
+</app-page-header>
+<section class="card">
+  <app-table-toolbar
+    searchId="department-keyword"
+    searchPlaceholder="ค้นหารหัส หรือชื่อแผนก..."
+    [(keyword)]="keyword"
+    [loading]="loading()"
+    [activeFilterCount]="activeFilterCount"
+    (search)="search()"
+    (resetFilters)="resetFilters()"
+  >
+    <app-select
+      selectId="department-branch-filter"
+      label="สาขา"
+      name="branchId"
+      [clearable]="true"
+      [panelMinWidth]="260"
+      [options]="branchOptions()"
+      [value]="branchFilter()"
+      (valueChange)="onBranchFilterChange($event)"
+    />
+    <app-select
+      selectId="department-division-filter"
+      label="ฝ่าย"
+      name="divisionId"
+      [clearable]="true"
+      [panelMinWidth]="260"
+      [options]="divisionOptions()"
+      [(ngModel)]="divisionId"
+    />
+    <app-select
+      selectId="department-status"
+      label="สถานะ"
+      name="active"
+      [clearable]="true"
+      [options]="statusOptions"
+      [(ngModel)]="active"
+    />
+  </app-table-toolbar>
+  <app-data-table
+    [rows]="rows()"
+    [columns]="columns"
+    caption="รายชื่อแผนก"
+    [loading]="loading()"
+    [failed]="failed()"
+    [total]="total()"
+    [page]="page"
+    [pageSize]="pageSize"
+    [sortField]="sortBy"
+    [sortDirection]="sortDirection"
+    (sort)="sort($event)"
+    (retry)="load()"
+    (pageChange)="pageTo($event)"
+    (pageSizeChange)="resize($event)"
+  >
+    <ng-template #rowActions let-row>
+      <div class="actions">
+        @if (row.isActive && session.hasAction('DBRT03', 'UPDATE')) {
+          <app-button type="button" (buttonClick)="edit(row.id)">แก้ไข</app-button>
+        }
+        @if (session.hasAction('DBRT03', row.isActive ? 'DEACTIVATE' : 'ACTIVATE')) {
+          <app-button type="button" [disabled]="saving()" [class.row-action-danger]="row.isActive" (buttonClick)="statusById(row.id)">
+            {{ row.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน' }}
+          </app-button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</section>
+

@@ -1,0 +1,59 @@
+<app-page-header
+  eyebrow="ข้อมูลองค์กร / DBRT02"
+  title="ข้อมูลสาขา"
+  description="จัดการสาขาภายใต้บริษัทที่กำลังทำงาน"
+>
+  @if (session.canCreate('DBRT02')) {
+    <a class="button primary" routerLink="create">+ เพิ่มสาขา</a>
+  }
+</app-page-header>
+<section class="card">
+  <app-table-toolbar
+    searchId="branch-keyword"
+    searchPlaceholder="ค้นหารหัส หรือชื่อสาขา..."
+    [(keyword)]="keyword"
+    [loading]="loading()"
+    [activeFilterCount]="activeFilterCount"
+    (search)="search()"
+    (resetFilters)="resetFilters()"
+  >
+    <app-select
+      selectId="branch-status"
+      label="สถานะ"
+      name="active"
+      [clearable]="true"
+      [options]="statusOptions"
+      [(ngModel)]="active"
+    />
+  </app-table-toolbar>
+  <app-data-table
+    [rows]="rows()"
+    [columns]="columns"
+    caption="รายชื่อสาขา"
+    [loading]="loading()"
+    [failed]="failed()"
+    [total]="total()"
+    [page]="page"
+    [pageSize]="pageSize"
+    [sortField]="sortBy"
+    [sortDirection]="sortDirection"
+    (sort)="sort($event)"
+    (retry)="load()"
+    (pageChange)="pageTo($event)"
+    (pageSizeChange)="resize($event)"
+  >
+    <ng-template #rowActions let-row>
+      <div class="actions">
+        @if (row.isActive && session.hasAction('DBRT02', 'UPDATE')) {
+          <app-button type="button" (buttonClick)="edit(row.id)">แก้ไข</app-button>
+        }
+        @if (session.hasAction('DBRT02', row.isActive ? 'DEACTIVATE' : 'ACTIVATE')) {
+          <app-button type="button" [disabled]="saving()" [class.row-action-danger]="row.isActive" (buttonClick)="statusById(row.id)">
+            {{ row.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน' }}
+          </app-button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</section>
+

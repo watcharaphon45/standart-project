@@ -1,0 +1,115 @@
+<a routerLink="/su/surt07">← กลับขั้นตอนอนุมัติ</a>
+<h1>{{ editing ? 'แก้ไขขั้นตอนอนุมัติ' : 'เพิ่มขั้นตอนอนุมัติ' }}</h1>
+<section class="card">
+  @if (loading()) {
+    <app-loading />
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+    <app-button type="button" (buttonClick)="load()" [disabled]="pending.busy()">
+      โหลดข้อมูลใหม่
+    </app-button>
+  }
+  @if (conflict()) {
+    <div class="conflict" role="alert">
+      <h2>ข้อมูลถูกแก้ไขแล้ว</h2>
+      <p>โหลดข้อมูลล่าสุด แล้วนำค่าที่กรอกมาปรับใหม่ด้วยตนเอง</p>
+      <app-button type="button" (buttonClick)="load()">โหลดข้อมูลล่าสุด</app-button>
+    </div>
+  }
+  @if (draft(); as previous) {
+    <div class="draft">
+      <h2>ค่าที่กรอกไว้สำหรับอ้างอิง</h2>
+      <p>
+        รหัส: {{ previous.code }} | ชื่อ: {{ previous.name }} | เอกสาร: {{ previous.documentType }}
+        ({{ previous.stepCount }} ขั้น)
+      </p>
+    </div>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="!loaded() || loading() || pending.busy() || conflict()">
+      <app-input
+        inputId="wf-code"
+        label="รหัสขั้นตอนอนุมัติ"
+        formControlName="code"
+        [maxlength]="50"
+        [required]="true"
+        [hint]="locked() ? 'ถูกใช้อ้างอิงแล้ว เปลี่ยนไม่ได้' : 'ใช้ A–Z, 0–9, - และ _ สูงสุด 50 ตัวอักษร'"
+        [error]="errors.message(form, 'code')"
+        [invalid]="form.controls.code.touched && form.controls.code.invalid"
+      />
+      <app-input
+        inputId="wf-name"
+        label="ชื่อสายอนุมัติ"
+        formControlName="name"
+        [maxlength]="200"
+        [required]="true"
+        [error]="errors.message(form, 'name')"
+        [invalid]="form.controls.name.touched && form.controls.name.invalid"
+      />
+      <app-input
+        inputId="wf-doctype"
+        label="รหัสประเภทเอกสาร"
+        formControlName="documentType"
+        [maxlength]="50"
+        [required]="true"
+        hint="เช่น PR, PO, JV (A–Z, 0–9, - และ _)"
+        [error]="errors.message(form, 'documentType')"
+        [invalid]="form.controls.documentType.touched && form.controls.documentType.invalid"
+      />
+      <div class="steps-header">
+        <h2>ลำดับขั้นการอนุมัติ ({{ steps.length }} ขั้น)</h2>
+        <app-button type="button" (buttonClick)="addStep()" [disabled]="steps.length >= 20">
+          + เพิ่มขั้นตอน
+        </app-button>
+      </div>
+      <div formArrayName="steps" class="steps-list">
+        @for (step of steps.controls; track $index; let i = $index) {
+          <div class="step-card" [formGroupName]="i">
+            <div class="step-head">
+              <strong>ขั้นที่ {{ i + 1 }}</strong>
+              @if (steps.length > 1) {
+                <app-button type="button" (buttonClick)="removeStep(i)">ลบ</app-button>
+              }
+            </div>
+            <app-input
+              [inputId]="'wf-step-name-' + i"
+              label="ชื่อขั้นตอน"
+              formControlName="stepName"
+              [maxlength]="200"
+              [required]="true"
+              [invalid]="step.controls.stepName.touched && step.controls.stepName.invalid"
+              [error]="step.controls.stepName.touched && step.controls.stepName.invalid ? 'กรุณาระบุชื่อขั้นตอน' : ''"
+            />
+            <app-select
+              [selectId]="'wf-step-role-' + i"
+              label="บทบาทผู้อนุมัติ"
+              formControlName="approverRoleId"
+              [options]="roleOptions()"
+              [required]="true"
+              [invalid]="step.controls.approverRoleId.touched && step.controls.approverRoleId.invalid"
+              [error]="step.controls.approverRoleId.touched && step.controls.approverRoleId.invalid ? 'กรุณาเลือกบทบาทผู้อนุมัติ' : ''"
+            />
+            <app-checkbox
+              [checkboxId]="'wf-step-diff-' + i"
+              label="ต้องเป็นผู้ปฏิบัติคนละรายกับขั้นตอนก่อนหน้า"
+              formControlName="requireDifferentActor"
+            />
+          </div>
+        }
+      </div>
+      <div class="actions">
+        <app-button
+          type="submit"
+          variant="primary"
+          [loading]="pending.busy()"
+          [disabled]="loading() || conflict()"
+        >
+          {{ pending.busy() ? 'กำลังบันทึก…' : 'บันทึกข้อมูล' }}
+        </app-button>
+        <a class="button" routerLink="/su/surt07">ยกเลิก</a>
+      </div>
+    </fieldset>
+  </form>
+</section>
+

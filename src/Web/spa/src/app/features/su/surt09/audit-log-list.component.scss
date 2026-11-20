@@ -1,0 +1,50 @@
+.actions {
+  margin: 0;
+}
+
+.detail-card {
+  margin-top: 1.25rem;
+  padding: 1.5rem;
+}
+
+.detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.detail-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.meta {
+  color: var(--muted);
+  margin: 0.5rem 0 1rem;
+  font-size: 0.9rem;
+}
+
+.snapshots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.snapshots h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+}
+
+pre {
+  margin: 0;
+  padding: 0.75rem;
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.85rem;
+}
+

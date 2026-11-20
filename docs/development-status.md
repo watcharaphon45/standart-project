@@ -1,0 +1,49 @@
+# สถานะการพัฒนา — 20 พฤศจิกายน 2026
+
+มติล่าสุด: ใช้เฉพาะส่วนที่ไม่มีค่า License/Subscription/ค่าตามการใช้งานตาม [นโยบายค่าใช้จ่าย](cost-policy.md) คง MediatR 12.5.0 / Apache-2.0 ปรับ Start-Database.ps1 ให้ใช้ Podman สำหรับการตั้งค่าใหม่ (ตรวจ Syntax แล้ว แต่ยังไม่ได้ติดตั้ง/ทดสอบ Podman บนเครื่องนี้หรือย้ายฐานข้อมูล Docker เดิม)
+
+ระยะที่ 1, ระยะที่ 2, ระยะที่ 3 และ **ระยะที่ 4.1–4.3 (ส่วนวิศวกรรมในโปรเจกต์)** เสร็จสมบูรณ์แล้ว: Login/Session, Custom UI Component Library พร้อม Instagram Design System, **DBRT01–DBRT07 Full Vertical Slices** (`Company`, `Branch`, `Department`, `Division`, `Position`, `CostCenter`, `BusinessUnit`), **SURT01–SURT04 System Administration** (`User`, `Role`, `Permission`, `UserScope`), **SURT05–SURT09 System Operations** (`MenuConfig`, `DocumentSequence`, `ApprovalWorkflow`, `SystemSettings`, `AuditLogs`) ครบทั้ง 16 โปรแกรม พร้อม Application Shell (จัดกลุ่มเมนูย่อ/ขยายได้, แยก Scroll ระหว่าง Sidebar กับเนื้อหาหลัก, Mobile Drawer, Breadcrumb, User Menu), Search Section & Enterprise Data Table ใหม่, Playwright E2E + axe หลาย Viewport และความพร้อมระดับ Production (Health/Readiness, Observability, Security Headers, Production Configuration Hardening, Migration Dry-Run และ Backup/Restore Drill) ดู [Deployment Runbook](operations/deployment.md) และ [ADR-079](adr/ADR-079-production-readiness.md)
+
+## ทำแล้ว
+
+- Solution `clean` แบ่ง Domain/Application/Infrastructure/Web และ Angular 22 ใน `src/Web/spa`
+- MediatR 12.5.0 ตามที่ผู้ใช้เลือก, FluentValidation Async Pipeline, PostgreSQL 18 และ Migration แยก `OrganizationDbContext` / `SystemDbContext` พร้อม `OrganizationMasters` (`20261118065519`), `OrganizationIntegrity` (`20261118999999`), `SystemAdministration` (`20261119000000`) และ `SystemOperations` (`20261119010000`)
+- Login Username/Email, Cookie/CSRF/CORS, Lockout, Session 30 นาที/8 ชั่วโมง และตรวจเพิกถอนทุก Request
+- Bootstrap บัญชีแรกด้วยรหัสชั่วคราวที่ Admin กรอก อายุ 24 ชั่วโมง บังคับเปลี่ยน และตรวจ HIBP แบบ Fail Closed พร้อมสร้าง Role ส่วนกลาง `CompanyRegistrar`, `OrganizationAdministrator`, `SharedMasterAdministrator`, `AccountAdministrator` (`SURT01.*`), `AccessAdministrator` (`SURT02.*`, `SURT03.*`, `SURT04.*`) และ `SystemCoordinator` (`SURT05.*`–`SURT09.*`)
+- **DBRT01–07 Full Vertical Slices**: สร้าง/ค้นหา/ดู/แก้ไข/เปิดปิดข้อมูลบริษัท สาขา ฝ่าย แผนก ศูนย์ต้นทุน และ Shared Master (ตำแหน่งงาน/หน่วยธุรกิจ)
+- **SURT01–04 System Administration Vertical Slices**:
+    - `SURT01` ผู้ใช้งาน (Global-only): สร้าง/แก้ไขบัญชี ตั้งรหัสชั่วคราว 24 ชม. พร้อม HIBP screening นอก Transaction, รีเซ็ตรหัส (เพิกถอน Session ทันที), ปลดล็อก Lockout และเปิด/ปิดบัญชี (ป้องกันปิดตนเอง)
+    - `SURT02` บทบาท: แยก Unique Index `(CompanyId, NormalizedName)` ให้แต่ละบริษัทตั้งรหัสบทบาทซ้ำข้ามบริษัทได้ พร้อม Code Lock และป้องกันปิดบทบาทที่มี Assignment/UserRole/Workflow Active
+    - `SURT03` สิทธิ์บทบาท: เมทริกซ์สิทธิ์ตาม `ProgramRegistry` พร้อมบังคับเพดานสิทธิ์ (`CompanyGrantablePermissions`), ป้องกัน Global-only permission (`SURT01.*`, `SURT05.*`) บน Company Role และป้องกันการเพิ่มสิทธิ์ให้ตนเอง
+    - `SURT04` ขอบเขตผู้ใช้งาน: กำหนด Role (`1 Role ต่อ User ต่อ Company`) และ Scope (`Company`/`Branch`/`Department`) พร้อมแสดงรายการแผนกที่เข้าถึงได้จริง และเพิกถอน Session เดิมทันทีผ่าน `AuthorizationFingerprint`
+- **SURT05–09 System Operations Vertical Slices**:
+    - `SURT05` เมนูระบบ (Global-only): ปรับชื่อแสดงผล ลำดับ และเปิด/ปิดการแสดงผลเมนูใน `/api/auth/me` โดยคง Backend Policy Authorization ไว้เสมอ
+    - `SURT06` เลขที่เอกสาร: กำหนด Prefix, Padding 3–10 หลัก, รอบรีเซ็ต (`NONE`/`YEAR`/`YEAR_MONTH`), จองเลขถัดไปแบบ Atomic (`FOR UPDATE`) พร้อมล็อกรหัส/รูปแบบหลังออกเลขแรกแล้ว (`CODE_LOCKED`)
+    - `SURT07` ขั้นตอนอนุมัติ: กำหนดลำดับอนุมัติหลายขั้นตามเอกสาร เลือก Role ภายในบริษัทเดียวกัน บังคับ `1..N` และแยกผู้ปฏิบัติ (`RequireDifferentActor`) เมื่อขั้นต่อเนื่องใช้ Role เดียวกัน พร้อมล็อกบทบาทผู้อนุมัติใน DB Trigger
+    - `SURT08` ตั้งค่าระบบ: รองรับตั้งค่า Global (`companyId = null`) และ Company พร้อม Seed ค่าเริ่มต้นระบบ, ตรวจสอบชนิดข้อมูล (`STRING`/`INTEGER`/`BOOLEAN`) และซ่อนค่า `IsSensitive` ทั้งใน API และ Audit (`***MASKED***`)
+    - `SURT09` ประวัติการใช้งาน: แยกสิทธิ์ `VIEW`/`EXPORT`, กรองตามขอบเขต Global / Company / Branch / Department, ซ่อน Global Programs (`AUTH`, `BOOTSTRAP`, `SURT01`, `DBRT05`, `DBRT07`, `SURT05`) จากผู้ใช้ระดับบริษัท และส่งออก CSV ที่ป้องกัน Formula Injection
+- บังคับ Hierarchy & Referential Integrity ทั้งใน Domain/Handler และ PostgreSQL Trigger: `CodeLocked` & `REPARENT_LOCKED` เมื่อถูกอ้างอิง, Bottom-up Deactivation (`PARENT_INACTIVE`, `ACTIVE_CHILDREN`, `ACTIVE_ASSIGNMENTS`), `String` BIGINT, Serializable Transaction + Audit Commit/Rollback พร้อมกัน, Optimistic Concurrency Conflict recovery (Draft state)
+- Custom UI Component Library ใน `src/Web/spa/src/app/shared/ui/` (`app-button`, `app-input`, `app-textarea`, `app-select`, `app-checkbox`, `app-radio-group`, `app-date-picker`, `app-form-field`, `app-data-table`, `app-table-toolbar`, `app-table-pagination`, `app-page-header`, `app-confirm-dialog`, `app-notification`, `app-loading`, `app-empty-state`, `app-error-state`) และธีม **Instagram Design System** ใน `styles.css`
+- Company Switcher, Reactive Forms และ Component 3 ไฟล์ (`.ts/.html/.scss`) พร้อม `OrganizationListBase`/`OrganizationFormBase` และ Session Storage แทน ID ใน URL
+- **Application Shell, Search Toolbar, Enterprise Data Table & Direct Editable Combobox DDL (ระยะที่ 4.1 + UI Polish)**: Sidebar จัดกลุ่มตามโมดูล (`ข้อมูลองค์กร` / `ระบบและการตั้งค่า`) ซ่อนรหัสโปรแกรม ย่อ/ขยายได้ทั้งระดับกลุ่มและทั้งแถบ Desktop (`256px` ↔ `72px` พร้อมจำสถานะใน `sessionStorage`), Fixed-Viewport App Shell (`h-dvh overflow-hidden`) ให้ Sidebar และเนื้อหาหลัก Scroll แยกกันพร้อมรีเซ็ต Scroll เมื่อเปลี่ยนเส้นทาง, Mobile Modal Drawer (`cdkTrapFocus`, กด `Escape` ปิดพร้อมคืน Focus), Header Breadcrumb และ User Menu; ปรับ `TableToolbarComponent` สำหรับทุกหน้าค้นหา, ปรับ `DataTableComponent` / `TablePaginationComponent` แบบ Clean Enterprise Minimal ครบทั้ง 15 หน้ารายการ และอัปเกรด `SelectComponent` (`<app-select>`) เป็น **Direct Editable Combobox** ตามมาตรฐาน WAI-ARIA 1.2 + `@angular/cdk/overlay` (พิมพ์ค้นหาในช่องตรงได้ทันที, แสดงรหัส/กลุ่ม/ป้าย `ปิดใช้งาน`, ไฮไลต์คำที่พบ, คีย์บอร์ด `↑ ↓ Home End Enter Esc Tab`, ปุ่มล้างค่า `×` และโหมดขนาด `sm`/`md`)
+- **Production Readiness (ระยะที่ 4.3 — ส่วนโค้ด สคริปต์ และ Runbook)**:
+    - `src/Web/Health/`: แยก `GET /health` (Liveness) และ `GET /health/ready` (Readiness ตรวจ PostgreSQL `SELECT 1` Timeout 5 วินาที คืน `200`/`503` โดยไม่เปิดเผย Connection String, Host, Username หรือ Exception) พร้อมข้าม Gate `must_change_password`
+    - `src/Web/Middleware/`: `RequestObservabilityMiddleware` (แนบ `X-Trace-Id` Header/Scope ร่วมกับ Audit `TraceId`, Log เฉพาะ Method, Path, StatusCode, ElapsedMs, Numeric `UserId` และตั้ง JSON Console Formatter ใน `appsettings.json`) และ `SecurityHeadersMiddleware` (`no-store`, `nosniff`, `DENY`, `no-referrer`, `Permissions-Policy`, `CSP default-src 'none'`)
+    - `src/Web/Configuration/ProductionReadiness.cs`: ตรวจ `Cors:AllowedOrigins` (ห้าม `*`/Path และบังคับ `https://` นอก `Development`), รองรับ `Cookies:SameSite` (`None`/`Lax`/`Strict`), Optional `ReverseProxy` `ForwardedHeaders` (`KnownProxies`/`KnownIPNetworks`) และ Optional `DataProtection:KeyDirectory`
+    - `scripts/` & `docs/operations/deployment.md`: เพิ่ม `Export-Migrations.ps1` (สร้าง Idempotent SQL Script พร้อมตรวจซ้ำ), `Backup-Database.ps1`, `Restore-Database.ps1 -Drill` และคู่มือ Production Operations + แนวทาง Audit Retention
+
+## หลักฐานการตรวจ
+
+- `clean.Tests.dll` (Backend/Security/API/ProductionReadiness): **34 passed, 0 failed, 1 skipped** (Total 35; ชุด Browser ถูก Skip เมื่อรันชุด Backend ปกติ) ใช้ PostgreSQL จริงที่สร้างชั่วคราว ครอบคลุม Domain/Hierarchy/Scope, SURT01–09, Health/Readiness 200/503 + Secret Redaction + Security Headers, Migration Idempotent SQL 2-Pass Dry-Run และ CORS/SameSite Validation
+- Frontend Unit (`Vitest`): **5 test files passed, 20 tests passed** (`form-error.service`, `api.interceptor`, `company-form.component`, `shell.component`, `ui-components` รวม Direct Editable Combobox + Reactive Forms + Clearable) และ `ng build` ผ่านสำเร็จ (`Initial total 402.65 kB`, Estimated transfer `102.67 kB`, 0 warnings)
+- Browser E2E (`BrowserRunsCompanyFlowAgainstRealApi` — Chromium + axe): **1 passed, 0 failed** (31 s) เชื่อม HTTPS API จริง ทดสอบ Login, Shell Grouping/Collapse/Breadcrumb/Independent Scroll, Editable Combobox พิมพ์ค้นหา/เลือกค่า (`DBRT04`/`DBRT03`), `DBRT01`–`04`, `SURT02`/`06`/`08`/`09`, Desktop `1440×1000`, Tablet `1024×768` และ Mobile `390×844` พร้อม axe WCAG 2.1 AA อัตโนมัติ (ไม่มีการอ้างว่าผ่าน Screen Reader จริงทุกชนิด)
+- Artifacts dry-run: Release API publish (`.local/artifacts/api`) และ Idempotent SQL scripts (`.local/artifacts/migrations/01-organization.sql` `12,271` bytes, `02-system.sql` `35,830` bytes) สำเร็จ 0 errors, 0 warnings
+- `scripts/Migrate.ps1`: Apply Migrations รวมถึง `20261118065519_OrganizationMasters`, `20261118999999_OrganizationIntegrity`, `20261119000000_SystemAdministration` และ `20261119010000_SystemOperations` ลง `clean_dev` ท้องถิ่นสำเร็จแล้ว (ฐานข้อมูลพัฒนายังรอ Admin รัน Bootstrap เพื่อสร้างบัญชีจริง ไม่มีรหัสผ่านตัวอย่างฝังในระบบ)
+
+## งานถัดไปที่รอสภาพแวดล้อมจริงและการตรวจรับฝั่งองค์กร
+
+1. เลือก Hosting/โดเมนจริง กำหนด `AllowedHosts`, `Cors:AllowedOrigins`, `Cookies:SameSite`, `ReverseProxy`, `DataProtection:KeyDirectory` และทดสอบ Cookie ข้ามไซต์บน Browser ขององค์กร
+2. อนุมัตินโยบาย Audit Retention สำหรับ `SuAuditEvent`, ตั้ง Monitoring/Alerting บน `/health/ready` 503 และรัน Load/Stress Test + Screen Reader จริงตามสภาพแวดล้อมเป้าหมาย
+3. ย้ายฐานข้อมูลและทดสอบ `Start-Database.ps1` เมื่อติดตั้ง Podman ในเครื่อง/สภาพแวดล้อมใหม่ (ตาม [นโยบายค่าใช้จ่าย](cost-policy.md))
+
+API Versioning สำหรับระบบภายนอกและ Program Code เมื่อใกล้เต็ม 01–99 ยังเป็นเรื่องที่เลื่อนไว้ตามมติเดิม

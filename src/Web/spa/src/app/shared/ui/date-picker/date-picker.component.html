@@ -1,0 +1,29 @@
+<div class="control-field">
+  @if (label()) {
+    <label [for]="dateId()">
+      {{ label() }}@if (required()) { <span class="required" aria-hidden="true">*</span> }
+    </label>
+  }
+  <input
+    #dateElement
+    type="date"
+    [id]="dateId()"
+    [attr.name]="name() || null"
+    [value]="value()"
+    [attr.min]="min()"
+    [attr.max]="max()"
+    [required]="required()"
+    [disabled]="isDisabled()"
+    [attr.aria-invalid]="isInvalid() ? 'true' : null"
+    [attr.aria-describedby]="describedBy()"
+    (input)="onDateChange($event)"
+    (blur)="onBlur()"
+  />
+  @if (hint()) {
+    <small [id]="dateId() + '-help'">{{ hint() }}</small>
+  }
+  @if (error()) {
+    <p [id]="dateId() + '-error'" class="error">{{ error() }}</p>
+  }
+</div>
+

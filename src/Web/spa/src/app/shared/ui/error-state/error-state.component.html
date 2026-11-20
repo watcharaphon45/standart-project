@@ -1,0 +1,9 @@
+<div class="state" role="alert">
+  <p>{{ message() }}</p>
+  @if (showRetry()) {
+    <app-button type="button" [disabled]="disabled()" (buttonClick)="retry.emit()">
+      {{ retryText() }}
+    </app-button>
+  }
+</div>
+

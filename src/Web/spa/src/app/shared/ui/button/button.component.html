@@ -1,0 +1,16 @@
+<button
+  #btn
+  [type]="type()"
+  [class]="variantClass()"
+  [class.align-between]="align() === 'between'"
+  [disabled]="isDisabled()"
+  [attr.aria-busy]="loading() ? 'true' : null"
+  [attr.aria-label]="ariaLabel() || null"
+  [attr.aria-expanded]="ariaExpanded()"
+  [attr.aria-controls]="ariaControls()"
+  [attr.title]="titleText() || null"
+  (click)="onInnerClick($event)"
+>
+  <ng-content />
+</button>
+

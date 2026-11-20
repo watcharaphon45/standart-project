@@ -1,0 +1,116 @@
+<a routerLink="/su/surt01">← กลับข้อมูลผู้ใช้งาน</a>
+<h1>{{ editing ? 'แก้ไขผู้ใช้งาน' : 'เพิ่มผู้ใช้งาน' }}</h1>
+<section class="card">
+  @if (loading()) {
+    <app-loading />
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+    @if (editing) {
+      <app-button type="button" (buttonClick)="load()" [disabled]="pending.busy()">
+        โหลดข้อมูลใหม่
+      </app-button>
+    }
+  }
+  @if (conflict()) {
+    <div class="conflict" role="alert">
+      <h2>ข้อมูลถูกแก้ไขแล้ว</h2>
+      <p>โหลดข้อมูลล่าสุด แล้วนำค่าที่กรอกมาปรับใหม่ด้วยตนเอง</p>
+      <app-button type="button" (buttonClick)="load()">โหลดข้อมูลล่าสุด</app-button>
+    </div>
+  }
+  @if (draft(); as previous) {
+    <div class="draft">
+      <h2>ค่าที่กรอกไว้สำหรับอ้างอิง</h2>
+      <p>ชื่อผู้ใช้งาน: {{ previous.userName }}</p>
+      <p>อีเมล: {{ previous.email }}</p>
+    </div>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="!loaded() || loading() || pending.busy() || conflict()">
+      <app-input
+        inputId="su-user-name"
+        label="ชื่อผู้ใช้งาน (Username)"
+        formControlName="userName"
+        [maxlength]="100"
+        [required]="true"
+        hint="ใช้ A–Z, a–z, 0–9, จุด, - และ _ สูงสุด 100 ตัวอักษร (ห้ามมี @)"
+        [error]="errors.message(form, 'userName')"
+        [invalid]="form.controls.userName.touched && form.controls.userName.invalid"
+      />
+      <app-input
+        inputId="su-user-email"
+        label="อีเมล"
+        type="email"
+        formControlName="email"
+        [maxlength]="256"
+        [required]="true"
+        [error]="errors.message(form, 'email')"
+        [invalid]="form.controls.email.touched && form.controls.email.invalid"
+      />
+      @if (!editing) {
+        <app-input
+          inputId="su-user-temp-password"
+          label="รหัสผ่านชั่วคราว (อายุ 24 ชั่วโมง)"
+          type="password"
+          autocomplete="new-password"
+          formControlName="temporaryPassword"
+          [maxlength]="128"
+          [required]="true"
+          hint="ความยาว 15–128 ตัวอักษร ระบบตรวจรหัสรั่วไหลและบังคับเปลี่ยนเมื่อ Login ครั้งแรก"
+          [error]="errors.message(form, 'temporaryPassword')"
+          [invalid]="
+            form.controls.temporaryPassword.touched && form.controls.temporaryPassword.invalid
+          "
+        />
+      }
+      <div class="actions">
+        <app-button
+          type="submit"
+          variant="primary"
+          [loading]="pending.busy()"
+          [disabled]="loading() || conflict()"
+        >
+          {{ pending.busy() ? 'กำลังบันทึก…' : 'บันทึกข้อมูล' }}
+        </app-button>
+        <a class="button" routerLink="/su/surt01">ยกเลิก</a>
+      </div>
+    </fieldset>
+  </form>
+</section>
+
+@if (editing && loaded() && session.hasAction('SURT01', 'RESET')) {
+  <section class="card reset-card">
+    <h2>รีเซ็ตรหัสผ่านชั่วคราว</h2>
+    <p class="hint">
+      ตั้งรหัสผ่านชั่วคราวใหม่ (15–128 ตัวอักษร อายุ 24 ชั่วโมง) และเพิกถอน Session ปัจจุบันทั้งหมดทันที
+    </p>
+    @if (resetError()) {
+      <p class="error" role="alert">{{ resetError() }}</p>
+    }
+    <form [formGroup]="resetForm" (ngSubmit)="resetTemporaryPassword()">
+      <fieldset [disabled]="resetting() || conflict()">
+        <app-input
+          inputId="su-user-reset-password"
+          label="รหัสผ่านชั่วคราวใหม่"
+          type="password"
+          autocomplete="new-password"
+          formControlName="temporaryPassword"
+          [maxlength]="128"
+          [required]="true"
+          [error]="errors.message(resetForm, 'temporaryPassword')"
+          [invalid]="
+            resetForm.controls.temporaryPassword.touched &&
+            resetForm.controls.temporaryPassword.invalid
+          "
+        />
+        <div class="actions">
+          <app-button type="submit" [loading]="resetting()" [disabled]="conflict()">
+            {{ resetting() ? 'กำลังรีเซ็ต…' : 'ตั้งรหัสชั่วคราวใหม่' }}
+          </app-button>
+        </div>
+      </fieldset>
+    </form>
+  </section>
+}
+

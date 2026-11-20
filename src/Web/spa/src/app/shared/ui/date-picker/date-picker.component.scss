@@ -1,0 +1,36 @@
+:host {
+  display: block;
+}
+
+.control-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+label {
+  margin-bottom: 0;
+}
+
+input[type='date'] {
+  background: var(--canvas);
+  border: 1px solid #a8a8a8;
+  color: var(--text);
+}
+
+input[type='date']:focus {
+  background: var(--surface);
+  border-color: var(--text);
+}
+
+input[type='date']:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+small {
+  color: var(--muted);
+}
+
+.error:empty {
+  display: none;
+}

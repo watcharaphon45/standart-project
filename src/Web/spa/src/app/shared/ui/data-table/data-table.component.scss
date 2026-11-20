@@ -1,0 +1,158 @@
+:host {
+  display: block;
+}
+.table-scroll {
+  overflow: auto;
+}
+table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: separate;
+  border-spacing: 0;
+  text-align: left;
+}
+th,
+td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+th {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--canvas);
+  border-bottom-color: var(--border);
+  white-space: nowrap;
+}
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+tbody tr:hover td {
+  background: var(--canvas);
+}
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  font-weight: 600;
+  color: var(--muted);
+}
+.sort-btn:hover:not(:disabled) {
+  background: none;
+  color: var(--text);
+}
+.sort-btn.sorted {
+  color: var(--text);
+  font-weight: 700;
+}
+.sort-icon {
+  opacity: 0.5;
+}
+.sorted .sort-icon {
+  opacity: 1;
+  color: var(--brand);
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: #14532d;
+  background: #dcfce7;
+}
+.badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.badge.inactive,
+.tone-muted {
+  color: var(--muted);
+  background: #efefef;
+}
+.tone-warning {
+  color: #92400e;
+  background: #fef3c7;
+}
+.tone-error {
+  color: #9f1239;
+  background: #ffe4e6;
+}
+.tone-info {
+  color: #1e40af;
+  background: #dbeafe;
+}
+.code,
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+.code {
+  font-weight: 700;
+}
+.trace {
+  display: inline-block;
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+.muted,
+.trace,
+.row-inactive td {
+  color: var(--muted);
+}
+.cell-number {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.actions-head,
+.table-actions {
+  position: sticky;
+  right: 0;
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+  background: var(--surface);
+}
+.actions-head {
+  background: var(--canvas);
+}
+.skeleton {
+  display: block;
+  width: 70%;
+  height: 0.8rem;
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+.skeleton-actions {
+  width: 7rem;
+  height: 1.6rem;
+  margin-left: auto;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+@media (max-width: 1100px) {
+  .actions-head,
+  .table-actions {
+    box-shadow: inset 1px 0 0 var(--border-subtle);
+  }
+}

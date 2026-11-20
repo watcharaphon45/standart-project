@@ -1,0 +1,87 @@
+:host {
+  display: block;
+}
+
+.toolbar {
+  padding: 1rem 1.25rem;
+  display: grid;
+  gap: 0.75rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.toolbar-main {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 0;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: var(--brand);
+  color: #ffffff;
+}
+
+.filter-panel {
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--canvas);
+  border: 1px solid var(--border-subtle);
+  display: grid;
+  gap: 0.85rem;
+}
+
+.filter-panel[hidden] {
+  display: none;
+}
+
+.filter-grid {
+  display: grid;
+  gap: 0.85rem 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  align-items: end;
+}
+
+.filter-foot {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .toolbar-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+  }
+
+  .toolbar-actions > * {
+    flex: 1;
+  }
+
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,42 @@
+h1 {
+  font-size: 1.8rem;
+  margin: 1.5rem 0;
+}
+
+.card {
+  max-width: 760px;
+  padding: 2rem;
+}
+
+.reset-card {
+  margin-top: 1.5rem;
+}
+
+form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.actions {
+  margin-top: 1.5rem;
+}
+
+.conflict,
+.draft {
+  padding: 1rem;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  margin-bottom: 1rem;
+  border-radius: 0.5rem;
+}
+
+.draft {
+  background: var(--canvas);
+  border-color: var(--border);
+}
+
+h2 {
+  font-size: 1rem;
+  font-weight: 700;
+}
+

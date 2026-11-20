@@ -1,0 +1,67 @@
+<app-page-header
+  eyebrow="ผู้ดูแลระบบ / SURT01"
+  title="ข้อมูลผู้ใช้งาน"
+  description="จัดการบัญชีผู้ใช้งาน รหัสชั่วคราว การปลดล็อก และสถานะบัญชี (เฉพาะผู้ดูแลบัญชีส่วนกลาง)"
+>
+  @if (session.canCreate('SURT01')) {
+    <a class="button primary" routerLink="create">+ เพิ่มผู้ใช้งาน</a>
+  }
+</app-page-header>
+<section class="card">
+  <app-table-toolbar
+    searchId="user-keyword"
+    searchPlaceholder="ค้นหาชื่อผู้ใช้งาน หรืออีเมล..."
+    [(keyword)]="keyword"
+    [loading]="loading()"
+    [activeFilterCount]="activeFilterCount"
+    (search)="search()"
+    (resetFilters)="resetFilters()"
+  >
+    <app-select
+      selectId="user-status"
+      label="สถานะ"
+      name="active"
+      [clearable]="true"
+      [options]="statusOptions"
+      [(ngModel)]="active"
+    />
+  </app-table-toolbar>
+  <app-data-table
+    [rows]="rows()"
+    [columns]="columns"
+    caption="รายชื่อผู้ใช้งาน"
+    [loading]="loading()"
+    [failed]="failed()"
+    [total]="total()"
+    [page]="page"
+    [pageSize]="pageSize"
+    [sortField]="sortBy"
+    [sortDirection]="sortDirection"
+    (sort)="sort($event)"
+    (retry)="load()"
+    (pageChange)="pageTo($event)"
+    (pageSizeChange)="resize($event)"
+  >
+    <ng-template #rowActions let-row>
+      <div class="actions">
+        @if (session.hasAction('SURT01', 'UPDATE')) {
+          <app-button type="button" (buttonClick)="edit(row.id)">แก้ไข</app-button>
+        }
+        @if (row['isLockedOut'] && session.hasAction('SURT01', 'UNLOCK')) {
+          <app-button type="button" [disabled]="saving()" (buttonClick)="unlockById(row.id)">
+            ปลดล็อก
+          </app-button>
+        }
+        @if (
+          row.id !== session.user()?.id &&
+          session.hasAction('SURT01', row.isActive ? 'DISABLE' : 'ACTIVATE')
+        ) {
+          <app-button type="button" [disabled]="saving()" [class.row-action-danger]="row.isActive" (buttonClick)="statusById(row.id)">
+            {{ row.isActive ? 'ปิดใช้งาน' : 'เปิดใช้งาน' }}
+          </app-button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</section>
+

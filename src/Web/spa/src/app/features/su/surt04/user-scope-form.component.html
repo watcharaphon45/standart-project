@@ -1,0 +1,90 @@
+<a routerLink="/su/surt04">← กลับขอบเขตผู้ใช้งาน</a>
+<h1>กำหนดบทบาทและขอบเขตผู้ใช้งาน</h1>
+<section class="card">
+  @if (loading()) {
+    <app-loading />
+  }
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+    <app-button type="button" (buttonClick)="load()" [disabled]="pending.busy()">
+      โหลดข้อมูลใหม่
+    </app-button>
+  }
+  @if (conflict()) {
+    <div class="conflict" role="alert">
+      <h2>ข้อมูลถูกแก้ไขแล้ว</h2>
+      <p>โหลดข้อมูลล่าสุด แล้วนำค่าที่เลือกไว้มาปรับใหม่ด้วยตนเอง</p>
+      <app-button type="button" (buttonClick)="load()">โหลดข้อมูลล่าสุด</app-button>
+    </div>
+  }
+  @if (draft(); as previous) {
+    <div class="draft">
+      <h2>ค่าที่เลือกไว้สำหรับอ้างอิง</h2>
+      <p>ขอบเขต: {{ previous.scopeType }} | สถานะ: {{ previous.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}</p>
+    </div>
+  }
+  @if (detail(); as current) {
+    <div class="user-summary">
+      <p><strong>ผู้ใช้งาน:</strong> {{ current.userName }} ({{ current.email }})</p>
+    </div>
+  }
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <fieldset [disabled]="!loaded() || loading() || pending.busy() || conflict()">
+      <app-select
+        selectId="scope-role-id"
+        label="บทบาทประจำบริษัท"
+        formControlName="roleId"
+        [options]="roleOptions()"
+        [required]="true"
+        [error]="errors.message(form, 'roleId')"
+        [invalid]="form.controls.roleId.touched && form.controls.roleId.invalid"
+      />
+      <app-radio-group
+        name="scopeType"
+        legend="ระดับขอบเขตข้อมูล"
+        formControlName="scopeType"
+        [options]="scopeRadioOptions"
+        [required]="true"
+      />
+      @if (selectedScopeType() !== 'Company') {
+        <app-select
+          selectId="scope-target-id"
+          [label]="selectedScopeType() === 'Branch' ? 'สาขาที่อนุญาต' : 'แผนกที่อนุญาต'"
+          formControlName="scopeId"
+          [options]="scopeTargetOptions()"
+          [required]="true"
+          [error]="errors.message(form, 'scopeId')"
+          [invalid]="form.controls.scopeId.touched && form.controls.scopeId.invalid"
+        />
+      }
+      <app-checkbox
+        checkboxId="scope-is-active"
+        label="เปิดใช้งานสิทธิ์ในบริษัทนี้"
+        formControlName="isActive"
+      />
+      <div class="preview">
+        <h2>แผนกที่ผู้ใช้งานเข้าถึงได้จริง ({{ accessiblePreview().length }} แผนก)</h2>
+        @if (accessiblePreview().length === 0) {
+          <p class="empty-preview">ไม่มีแผนกที่เข้าถึงได้ภายใต้ขอบเขตปัจจุบัน</p>
+        } @else {
+          <ul>
+            @for (dept of accessiblePreview(); track dept.id) {
+              <li>{{ dept.branchCode }} / {{ dept.divisionCode }} / {{ dept.code }} · {{ dept.name }}</li>
+            }
+          </ul>
+        }
+      </div>
+      <div class="actions">
+        <app-button
+          type="submit"
+          variant="primary"
+          [loading]="pending.busy()"
+          [disabled]="loading() || conflict()"
+        >
+          {{ pending.busy() ? 'กำลังบันทึก…' : 'บันทึกขอบเขต' }}
+        </app-button>
+        <a class="button" routerLink="/su/surt04">ยกเลิก</a>
+      </div>
+    </fieldset>
+  </form>
+</section>
